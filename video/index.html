@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <video id="video" controls autoplay></video>
+    <div id="bitrates"></div>
+    <script>
+      const video = document.getElementById("video");
+      const bitrates = document.getElementById("bitrates");
+      const videoSrc = "playlist.m3u8"; //m3u8 적용
+
+      if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = "playlist.m3u8";
+      } else if (Hls.isSupported()) {
+        var hls = new Hls();
+        hls.loadSource("playlist.m3u8");
+        hls.attachMedia(video);
+        hls.loadLevel = 0;
+
+        hls.on(Hls.Events.MANIFEST_PARSED, (_, { levels }) => {
+          levels.map((level, index) => {
+            const button = document.createElement("button");
+            button.innerText = `${level.height}p`;
+            button.setAttribute("data-index", index);
+            bitrates.appendChild(button);
+          });
+        });
+
+        bitrates.addEventListener(
+          "click",
+          ({ target: { tagName, dataset } }) => {
+            if (tagName !== "BUTTON") return;
+            hls.currentLevel = dataset.index;
+          }
+        );
+      }
+    </script>
+  </body>
+</html>
